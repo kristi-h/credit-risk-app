@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://credit-risk-app.vercel.app", "http://localhost:5173"])
 
 FEATURE_COLS = [
     "age",
