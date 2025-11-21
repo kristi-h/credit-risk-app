@@ -38,6 +38,8 @@ function App() {
     max_transaction_amount: Number(form.max_transaction_amount),
   });
 
+  console.log("Using API URL:", import.meta.env.VITE_API_URL);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
