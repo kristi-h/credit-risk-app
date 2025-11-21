@@ -47,7 +47,7 @@ function App() {
     try {
       const payload = buildPayload();
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/predict`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
