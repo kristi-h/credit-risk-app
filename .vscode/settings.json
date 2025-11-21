@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "/Users/kristihwang/Desktop/credit-risk-app/backend/venv/bin/python",
+  "python.analysis.extraPaths": [
+    "/Users/kristihwang/Desktop/credit-risk-app/backend/venv/lib/python3.12/site-packages"
+  ]
+}
