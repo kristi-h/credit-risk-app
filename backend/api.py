@@ -17,12 +17,15 @@ FEATURE_COLS = [
     "transaction_count",
     "avg_transaction_amount",
     "max_transaction_amount",
+    "essentials_ratio",
+    "discretionary_ratio",
+    "risky_ratio",
     "too_many_credit_lines",
     "too_many_transactions",
     "big_avg_txn",
-    "discretionary_ratio",
-    "risky_ratio",
-    "essentials_ratio",
+    "high_discretionary",
+    "risk_seeking",
+    "overburdened_essentials"
 ]
 
 model = xgb.Booster()
@@ -31,9 +34,8 @@ model.load_model("xgb_model.json")
 def build_feature_row(payload: dict) -> dict:
     eps = 1e-6
 
-    # Basic inputs
     age = float(payload.get("age", 0))
-    income = float(payload.get("monthly_income", 0))  
+    income = float(payload.get("monthly_income", 0))  # Annual income
     employment_years = float(payload.get("employment_years", 0))
     num_late_payments = float(payload.get("num_late_payments", 0))
     num_credit_lines = float(payload.get("num_credit_lines", 0))
@@ -47,17 +49,22 @@ def build_feature_row(payload: dict) -> dict:
 
     total_spend = essentials + discretionary + risky
 
-    # Engineered features
-    credit_utilization = min(total_spend / (income + eps), 1.5) if income > 0 else 0.0
+    # Ratios
+    credit_utilization = min(total_spend / (income + eps), 1.5)
     discretionary_ratio = discretionary / (income + eps)
     risky_ratio = risky / (income + eps)
     essentials_ratio = essentials / (income + eps)
 
+    # Final engineered features (boolean signals)
     too_many_credit_lines = int(num_credit_lines > 5)
     too_many_transactions = int(transaction_count > 250)
     big_avg_txn = int(avg_txn > 200)
 
-    row = {
+    high_discretionary = int(discretionary_ratio > 0.25)
+    risk_seeking = int(risky_ratio > 0.2)
+    overburdened_essentials = int(essentials_ratio > 0.45)
+
+    return {
         "age": age,
         "income": income,
         "employment_years": employment_years,
@@ -67,16 +74,16 @@ def build_feature_row(payload: dict) -> dict:
         "transaction_count": transaction_count,
         "avg_transaction_amount": avg_txn,
         "max_transaction_amount": max_txn,
+        "essentials_ratio": essentials_ratio,
+        "discretionary_ratio": discretionary_ratio,
+        "risky_ratio": risky_ratio,
         "too_many_credit_lines": too_many_credit_lines,
         "too_many_transactions": too_many_transactions,
         "big_avg_txn": big_avg_txn,
-        "discretionary_ratio": discretionary_ratio,
-        "risky_ratio": risky_ratio,
-        "essentials_ratio": essentials_ratio,
+        "high_discretionary": high_discretionary,
+        "risk_seeking": risk_seeking,
+        "overburdened_essentials": overburdened_essentials,
     }
-
-    return row
-
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
